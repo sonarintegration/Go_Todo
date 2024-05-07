@@ -33,16 +33,29 @@ jobs:
       #- name: Secret Scanning
         # Integrate with your secret scanning tool
         # For example, if using truffleHog
-       # run: trufflehog .
+        # run: trufflehog .
 
       - name: Unit Test
         run: go test -v ./...
 
       - name: Code Coverage
-        run: go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out && go tool cover -html=coverage.out -o coverage.html
+        run: |
+          go test -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+          go tool cover -html=coverage.out -o coverage.html
 
-     # - name: Static Code Analysis with Quality Gate
-      #  run: sonar-scanner -Dsonar.projectKey=<your_project_key> -Dsonar.organization=<your_organization> -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=<your_sonar_token>
+      - name: Static Code Analysis
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=sonarintegration-1
+            -Dsonar.projectKey=sonarintegration-1_go-todo-project
+            -Dsonar.sources=./
+            -Dsonar.host.url=https://sonarcloud.io
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Build Artifact
         run: echo "Build artifact step"
