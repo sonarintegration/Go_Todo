@@ -1,0 +1,48 @@
+name: Main Branch CI Workflow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: CI for Go
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.22.1'
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Compile
+        run: go build -v .
+
+      #- name: Secret Scanning
+        # Integrate with your secret scanning tool
+        # For example, if using truffleHog
+       # run: trufflehog .
+
+      - name: Unit Test
+        run: go test -v ./...
+
+      - name: Code Coverage
+        run: go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out && go tool cover -html=coverage.out -o coverage.html
+
+     # - name: Static Code Analysis with Quality Gate
+      #  run: sonar-scanner -Dsonar.projectKey=<your_project_key> -Dsonar.organization=<your_organization> -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=<your_sonar_token>
+
+      - name: Build Artifact
+        run: echo "Build artifact step"
