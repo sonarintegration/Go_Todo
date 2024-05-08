@@ -26,7 +26,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-
+            
       - name: Compile
         run: go build -v .
 
@@ -38,6 +38,12 @@ jobs:
           go test -coverprofile=coverage.out ./...
           go tool cover -func=coverage.out
           go tool cover -html=coverage.out -o coverage.html
+        # Artifact the coverage report
+      - name: Upload Code Coverage Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: coverage.html
 
       - name: Static Code Analysis
         uses: sonarsource/sonarqube-scan-action@v2
@@ -52,7 +58,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
 
       - name: Send notification on Slack using Webhooks - Success
         if: ${{ always() }}
@@ -75,5 +80,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      
