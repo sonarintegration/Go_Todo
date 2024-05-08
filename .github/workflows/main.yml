@@ -30,11 +30,6 @@ jobs:
       - name: Compile
         run: go build -v .
 
-      #- name: Secret Scanning
-        # Integrate with your secret scanning tool
-        # For example, if using truffleHog
-        # run: trufflehog .
-
       - name: Unit Test
         run: go test -v ./...
 
@@ -58,8 +53,19 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+      - name: Download coverage.html
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-html
+
+      - name: Some Step 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage-html
+          path: ./
+
       - name: Send notification on Slack using Webhooks - Success
-        if: ${{ success() }}
+        if: ${{ always() }}
         uses: slackapi/slack-github-action@v1.24.0
         with:
           payload: |
