@@ -16,6 +16,8 @@ jobs:
 
       - name: Secert scan
         uses: max/secret-scan@master
+        with:
+          exclude_path: 'go.sum'  
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -41,8 +43,7 @@ jobs:
           go test -coverprofile=coverage.out ./...
           go tool cover -func=coverage.out
           go tool cover -html=coverage.out -o coverage.html
-        # Artifact the coverage report
-        # Upload Code Coverage Artifact
+        
 
       - name: Upload Code Coverage Artifact
         uses: actions/upload-artifact@v2
