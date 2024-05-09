@@ -44,6 +44,8 @@ jobs:
           go tool cover -func=coverage.out
           go tool cover -html=coverage.out -o coverage.html
         # Artifact the coverage report
+        # Upload Code Coverage Artifact
+
       - name: Upload Code Coverage Artifact
         uses: actions/upload-artifact@v2
         with:
