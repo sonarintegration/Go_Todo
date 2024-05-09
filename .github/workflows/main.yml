@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Secert scan
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - uses: max/secret-scan@master
 
       - name: Set up Go
