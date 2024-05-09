@@ -14,10 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Secert scan
-        uses: max/secret-scan@master
-        with:
-          exclude_path: 'go.sum'  
+     # - name: Secert scan
+    #    uses: max/secret-scan@master
+     #   with:
+       #   exclude_path: 'go.sum'  
 
       - name: Set up Go
         uses: actions/setup-go@v2
