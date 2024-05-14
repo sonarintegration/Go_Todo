@@ -22,16 +22,16 @@ jobs:
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+         scan-type: 'fs'
+         ignore-unfixed: true
+         format: 'sarif'
+         output: 'trivy-results.sarif'
+         severity: 'CRITICAL'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+         sarif_file: 'trivy-results.sarif'
 
       - name: Set up Go
         uses: actions/setup-go@v2
