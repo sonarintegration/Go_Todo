@@ -5,6 +5,10 @@ on:
     branches:
       - master
       - feature
+  pull_request:
+    branches:
+      - master
+      - feature
 
 jobs:
   build:
@@ -15,7 +19,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-    #  - name: Secert scan
+    #  - name: Secret scan
      #   uses: max/secret-scan@master
      #   with:
        #   exclude_path: 'go.sum'  
