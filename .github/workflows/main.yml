@@ -19,11 +19,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-    #  - name: Secret scan
-     #   uses: max/secret-scan@master
-     #   with:
-       #   exclude_path: 'go.sum'  
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -66,6 +61,11 @@ jobs:
             -Dsonar.sources=./
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.pullrequest.provider=GitHub
+            -Dsonar.pullrequest.github.repository=${{ github.repository }}
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
