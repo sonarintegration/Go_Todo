@@ -19,15 +19,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: '1.22.1'
 
-      - name: Install JFrog CLI
-        run: |
-          curl -fL https://getcli.jfrog.io | sh
-          sudo mv jfrog /usr/local/bin/
+     # - name: Install JFrog CLI
+     #   run: |
+      #    curl -fL https://getcli.jfrog.io | sh
+      #    sudo mv jfrog /usr/local/bin/
 
       - name: Cache dependencies
         uses: actions/cache@v2
@@ -64,9 +78,9 @@ jobs:
       - name: Set JFrog CLI Path
         run: export PATH=$PATH:/usr/local/bin
 
-      - name: Push Artifacts to JFrog
-        run: |
-         jfrog rt u  gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTY3NjUyNSwianRpIjoiZWYwNGIzODctZGRjMC00M2YxLTgzOTAtZGQyZmE3YjMwNGViIn0.b5oLSIpRWsHqwX9dLHLrjUHtTidWcDkTRmTEXLFeaSf67mJIKzLy3UKAYJGUgME6ByBUKJS3FQyKDUA8eJLKw3TJ-p2o08fbZPSrofjqTCogeuUEVS98w5n4q4tdtjaXjwaidcZ--MnfqqPCkGPlRto18YIuctmW9V6O4n6WUPxp1jMTIdRRvVd-LNRSUo7HVP0t9qYrUgCOWeyFtQiAkEdQ8kNCUYjx4UPfWhM5r14K5_SN9sDBUUk4fhgExBPTtlqpV-gGkFN8FmY-5pjmfurgFvWWwzDmORVRtqUXzqAiofoYyv0Zzv7eLzruJBO4fmUTt0Hywv2zQU4km_unIw
+    #  - name: Push Artifacts to JFrog
+    #    run: |
+    #     jfrog rt u  gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTY3NjUyNSwianRpIjoiZWYwNGIzODctZGRjMC00M2YxLTgzOTAtZGQyZmE3YjMwNGViIn0.b5oLSIpRWsHqwX9dLHLrjUHtTidWcDkTRmTEXLFeaSf67mJIKzLy3UKAYJGUgME6ByBUKJS3FQyKDUA8eJLKw3TJ-p2o08fbZPSrofjqTCogeuUEVS98w5n4q4tdtjaXjwaidcZ--MnfqqPCkGPlRto18YIuctmW9V6O4n6WUPxp1jMTIdRRvVd-LNRSUo7HVP0t9qYrUgCOWeyFtQiAkEdQ8kNCUYjx4UPfWhM5r14K5_SN9sDBUUk4fhgExBPTtlqpV-gGkFN8FmY-5pjmfurgFvWWwzDmORVRtqUXzqAiofoYyv0Zzv7eLzruJBO4fmUTt0Hywv2zQU4km_unIw
 
       - name: Static Code Analysis
         uses: sonarsource/sonarqube-scan-action@v2
