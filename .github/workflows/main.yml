@@ -66,7 +66,8 @@ jobs:
 
       - name: Push Artifacts to JFrog
         run: |
-         jf c add rt-server --artifactory-url https://shubhamtodo.jfrog.io/artifactory --user shubhamchav@cybage.com --password cmVmdGtuOjAxOjE3NDcyMTE3Nzc6NzNEQ0o3V3p6WkxQdUN1UnFvU1BvRmJKT1BY --interactive=false
+         jfrog rt u  gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTY3NjUyNSwianRpIjoiZWYwNGIzODctZGRjMC00M2YxLTgzOTAtZGQyZmE3YjMwNGViIn0.b5oLSIpRWsHqwX9dLHLrjUHtTidWcDkTRmTEXLFeaSf67mJIKzLy3UKAYJGUgME6ByBUKJS3FQyKDUA8eJLKw3TJ-p2o08fbZPSrofjqTCogeuUEVS98w5n4q4tdtjaXjwaidcZ--MnfqqPCkGPlRto18YIuctmW9V6O4n6WUPxp1jMTIdRRvVd-LNRSUo7HVP0t9qYrUgCOWeyFtQiAkEdQ8kNCUYjx4UPfWhM5r14K5_SN9sDBUUk4fhgExBPTtlqpV-gGkFN8FmY-5pjmfurgFvWWwzDmORVRtqUXzqAiofoYyv0Zzv7eLzruJBO4fmUTt0Hywv2zQU4km_unIw
+
       - name: Static Code Analysis
         uses: sonarsource/sonarqube-scan-action@v2
         with:
