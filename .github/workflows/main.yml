@@ -25,6 +25,10 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: code test
+          args: --sarif-file-output=snyk.sarif
+
+      - name: Print Snyk report
+        run: cat snyk.sarif
 
       - name: Set up Go
         uses: actions/setup-go@v2
