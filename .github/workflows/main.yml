@@ -98,8 +98,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Checkout Repository
-        uses: actions/checkout@v2
 
       - name: Download Code Coverage Artifact
         uses: actions/download-artifact@v2
