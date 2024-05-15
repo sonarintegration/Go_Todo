@@ -130,11 +130,16 @@ jobs:
         run: |
          jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
 
+     # - name: Publish Go package to Artifactory
+      #  run: |
+      #   jfrog rt go-config --repo-resolve-releases=gotodo-go-local --repo-resolve-snapshots=gotodo-go-local --repo-deploy=gotodo-go-local
+      #   jfrog rt go-publish gotodo-go-local --build-name= CI for Go --build-number=42
+
       - name: Publish Go package to Artifactory
         run: |
-         jfrog rt go-config --repo-resolve-releases=gotodo-go-local --repo-resolve-snapshots=gotodo-go-local --repo-deploy=gotodo-go-local
-         jfrog rt go-publish gotodo-go-local --build-name= CI for Go --build-number=42
+         jfrog rt go-publish gotodo-go-local
 
+      
       - name: Collect build info
         run: |
          jfrog rt build-collect-env my-build 1
