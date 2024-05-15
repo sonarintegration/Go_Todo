@@ -116,23 +116,29 @@ jobs:
             echo "Code coverage is above threshold: $COVERAGE%"
           fi
 
-
-      - name: Set up JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:
-         JF_URL: ${{ secrets.JF_URL }}
-         JF_USER: ${{ secrets.JF_USER }}
-         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
-         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-
-      
-
-      - name: Download, upload, and build artifacts
+      - name: Install JFrog CLI
         run: |
-            jf rt u aether artifacts/
-            jf rt bp
+         curl -fL https://getcli.jfrog.io | sh
+         chmod +x jfrog
+         mv jfrog /usr/local/bin/
+
+      - name: Configure JFrog CLI
         env:
-         JF_URL: ${{ secrets.JF_URL }}
-         JF_USER: ${{ secrets.JF_USER }}
-         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
-         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+         ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+         ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+         jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
+
+      - name: Publish Go package to Artifactory
+        run: |
+         jfrog rt go-config --repo-resolve-releases=my-go-repo --repo-resolve-snapshots=my-go-repo --repo-deploy=my-go-repo
+         jfrog rt go-publish my-go-repo --build-name=my-build --build-number=1
+
+      - name: Collect build info
+        run: |
+         jfrog rt build-collect-env my-build 1
+         jfrog rt build-add-git my-build 1
+
+      - name: Publish build info to Artifactory
+        run: jfrog rt build-publish my-build 1
