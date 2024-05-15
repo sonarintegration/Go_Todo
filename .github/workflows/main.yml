@@ -132,7 +132,14 @@ jobs:
          jf rt dl artifacts/
          jf rt u aether artifacts/
          jf rt bp
+         shell: /usr/bin/bash -e {0}
         env:
+         GOROOT: /opt/hostedtoolcache/go/1.22.1/x64
+         JFROG_CLI_ENV_EXCLUDE: "*password*;*secret*;*key*;*token*;*auth*;JF_ARTIFACTORY_*;JF_ENV_*;JF_URL;JF_USER;JF_PASSWORD;JF_ACCESS_TOKEN"
+         JFROG_CLI_OFFER_CONFIG: false
+         JFROG_CLI_BUILD_NAME: Main Branch CI Workflow
+         JFROG_CLI_BUILD_URL: https://github.com/SonarIntegration/Go_Todo/actions/runs/
+         JFROG_CLI_USER_AGENT: setup-jfrog-cli-github-action/4.0.2
          JF_URL: ${{ secrets.JF_URL }}
          JF_USER: ${{ secrets.JF_USER }}
          JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
