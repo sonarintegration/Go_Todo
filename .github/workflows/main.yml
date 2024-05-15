@@ -132,7 +132,7 @@ jobs:
 
       - name: Publish Go package to Artifactory
         run: |
-         jfrog rt go-config --repo-resolve-releases=my-go-repo --repo-resolve-snapshots=my-go-repo --repo-deploy=my-go-repo
+         jfrog rt go-config --repo-resolve-releases=gotodo-go-local --repo-resolve-snapshots=gotodo-go-local --repo-deploy=gotodo-go-local
          jfrog rt go-publish gotodo-go-local --build-name= CI for Go --build-number=42
 
       - name: Collect build info
