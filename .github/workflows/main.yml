@@ -24,6 +24,7 @@ jobs:
         with:
           go-version: '1.22.1'
 
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -115,3 +116,31 @@ jobs:
           else
             echo "Code coverage is above threshold: $COVERAGE%"
           fi
+
+
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+         JF_URL: ${{ secrets.JF_URL }}
+         JF_USER: ${{ secrets.JF_USER }}
+         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+
+      - name: Ping JFrog Artifactory
+        run: jf rt ping
+        env:
+         JF_URL: ${{ secrets.JF_URL }}
+         JF_USER: ${{ secrets.JF_USER }}
+         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+
+      - name: Download, upload, and build artifacts
+        run: |
+         jf rt dl artifacts/
+         jf rt u aether artifacts/
+         jf rt bp
+        env:
+         JF_URL: ${{ secrets.JF_URL }}
+         JF_USER: ${{ secrets.JF_USER }}
+         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
