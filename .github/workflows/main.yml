@@ -28,14 +28,16 @@ jobs:
           command: code test
           args: --sarif-file-output=snyk.sarif
 
+      - name: List directory contents
+        run: ls -la
       - name: Print Snyk report
         run: cat snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
-          upload: true
+         
 
       - name: Set up Go
         uses: actions/setup-go@v2
