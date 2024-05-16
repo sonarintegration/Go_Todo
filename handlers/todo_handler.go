@@ -10,7 +10,6 @@ import (
 	"todo_app/models"
 	"todo_app/services"
 )
-Api_key=354837
 // TodoHandler handles requests related to todos
 type TodoHandler struct {
 	// Define any dependencies or fields needed for the handler
