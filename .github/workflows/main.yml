@@ -14,6 +14,9 @@ jobs:
   build:
     name: CI for Go
     runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
     
     steps:
       - name: Checkout Repository
@@ -27,6 +30,15 @@ jobs:
         with:
           command: code test
           args: --sarif-file-output=snyk.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: results.sarif
+          # Optional category for the results
+          # Used to differentiate multiple results for one commit
+          category: my-analysis-tool
 
       - name: List directory contents
         run: ls -la
