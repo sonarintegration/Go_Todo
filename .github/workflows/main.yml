@@ -31,16 +31,7 @@ jobs:
       - name: List directory contents
         run: ls -la
       - name: Print Snyk report
-        run: cat snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          command: code test
-          sarif_file: snyk.sarif
-         
+        run: cat snyk.sarif         
 
       - name: Set up Go
         uses: actions/setup-go@v2
