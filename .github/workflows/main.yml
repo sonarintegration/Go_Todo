@@ -38,6 +38,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
+          command: code test
           sarif_file: snyk.sarif
          
 
