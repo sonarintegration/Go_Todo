@@ -42,6 +42,31 @@ jobs:
       - name: Print Snyk report
         run: cat snyk.sarif      
 
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+           scan-type: 'fs'
+           ignore-unfixed: true
+           format: 'sarif'
+           output: 'trivy-results.sarif'
+           severity: 'CRITICAL'
+
+ 
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: '.'
+          github-pat: ${{ secrets.TOKEN_GITHUB }}
+ 
+      - name: Create coverage artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: trivy result
+          path: dependency-results.sbom.json
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
