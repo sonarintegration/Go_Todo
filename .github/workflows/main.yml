@@ -41,7 +41,13 @@ jobs:
           category: my-analysis-tool
         
       - name: Print Snyk report
-        run: cat snyk.sarif         
+        run: cat snyk.sarif      
+
+      - name: Run dependency check
+        uses: DependencyCheck/dependency-check-action@v1
+        with:
+          format: 'ALL' # Generate reports in all supported formats
+          failOnCVSS: '5' # Fail if any CVE with CVSS score of 5 or above is found
 
       - name: Set up Go
         uses: actions/setup-go@v2
