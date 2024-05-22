@@ -35,11 +35,13 @@ jobs:
       - name: Compile
         run: go build -v .
 
-      - name: Unit Test
-        run: go test -v ./...
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
-      - name: Generate Test Report
-        run: go test -v ./... | go-junit-report > report.xml
+      - name: Run Unit Tests and Generate Report
+        run: |
+          go test -v ./... > test-output.txt
+          cat test-output.txt | $GOPATH/bin/go-junit-report > report.xml
 
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v2
