@@ -56,7 +56,7 @@ func main() {
 	corsHandler := cors.Default().Handler(mux)
 
 	// Start the server
-	port := ":8080"
+	port := "172.27.59.220:8080"
 	fmt.Println("Server started on port", port)
 	log.Fatal(http.ListenAndServe(port, corsHandler))
 }
