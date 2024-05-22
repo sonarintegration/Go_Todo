@@ -14,10 +14,58 @@ jobs:
   build:
     name: CI for Go
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+          args: --sarif-file-output=snyk.sarif
+
+      - name: List directory contents
+        run: ls -la
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+          category: my-analysis-tool
+        
+      - name: Print Snyk report
+        run: cat snyk.sarif      
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+           scan-type: 'fs'
+           ignore-unfixed: true
+           format: 'sarif'
+           output: 'trivy-results.sarif'
+           severity: 'CRITICAL'
+
+ 
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: '.'
+          github-pat: ${{ secrets.GH_TOKEN }}
+ 
+      - name: Create coverage artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: trivy result
+          path: dependency-results.sbom.json
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -35,19 +83,14 @@ jobs:
       - name: Compile
         run: go build -v .
 
-      - name: Install go-junit-report
-        run: go install github.com/jstemmer/go-junit-report/v2@latest
+      - name: Unit Test
+        run: go test -v ./... -json > report.json
 
-      - name: Run Unit Tests and Generate Report
-        run: |
-          go test -v ./... > test-output.txt
-          cat test-output.txt | $GOPATH/bin/go-junit-report > report.xml
-
-      - name: Upload Test Report Artifact
+      - name: Upload Test Report
         uses: actions/upload-artifact@v2
         with:
           name: test-report
-          path: report.xml
+          path: report.json
 
       - name: Code Coverage
         run: |
@@ -108,15 +151,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  coverage:
-    name: Coverage Check
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
       - name: Download Code Coverage Artifact
         uses: actions/download-artifact@v2
         with:
@@ -134,25 +168,31 @@ jobs:
             echo "Code coverage is above threshold: $COVERAGE%"
           fi
 
-  test-report:
-    name: Test Report
-    runs-on: ubuntu-latest
-    needs: build
+      - name: Install JFrog CLI
+        run: |
+         curl -fL https://getcli.jfrog.io | sh
+         chmod +x jfrog
+         mv jfrog /usr/local/bin/
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - name: Configure JFrog CLI
+        env:
+         ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+         ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+         jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
 
-      - name: Download Test Report Artifact
-        uses: actions/download-artifact@v2
+      - name: Push Artifacts to JFrog
+        run: |
+          jfrog rt u todo_app.exe gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTc1OTExNCwianRpIjoiNzNjMjRkNzgtMzc4ZC00YTdhLThiN2UtZDAxYTcwMTU4Zjc1In0.e2DMbVLertJgGOXmWWuFC_REpbHt6xTE7wGiDSYq_Y0TCMNrvuEiFND42KjqMGIepBGdvVlzzN0fkYkVapQNaHwT97NG1uDWutkhGvr6sLZsrDjhxCJk_H4Gssez2uBjf8Pea7dkAlw1M3qmWuz_7Xkb9s-C0_mUGHC97rEDUPeeGtaQ3-wDgXZUq24Ll6ABH13VYsbuNr7FsOb2J0RBW
+
+      - name: Upload test results as JUnit format
+        uses: actions/upload-artifact@v2
         with:
-          name: test-report
-          path: ./test-report
+          name: test-results
+          path: report.json
 
-      - name: Report Unit Tests
-        uses: dorny/test-reporter@v1
+      - name: Publish test results
+        uses: mikepenz/action-junit-report@v3
         with:
-          name: Unit Tests
-          path: ./test-report/report.xml
-          reporter: junit
-          fail-on-error: false
+          report_paths: '**/report.json'
