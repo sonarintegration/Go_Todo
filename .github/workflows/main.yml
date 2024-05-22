@@ -182,6 +182,10 @@ jobs:
         run: |
          jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
 
+      - name: Push Artifacts to JFrog
+        run: |
+          jfrog rt u todo_app.exe gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTc1OTExNCwianRpIjoiNzNjMjRkNzgtMzc4ZC00YTdhLThiN2UtZDAxYTcwMTU4Zjc1In0.e2DMbVLertJgGOXmWWuFC_REpbHt6xTE7wGiDSYq_Y0TCMNrvuEiFND42KjqMGIepBGdvVlzzN0fkYkVapQNaHwT97NG1uDWutkhGvr6sLZsrDjhxCJk_H4Gssez2uBjf8Pea7dkAlw1M3qmWuz_7Xkb9s-C0_mUGHC97rEDUPeeGtaQ3-wDgXZUq24Ll6ABH13VYsbuNr7FsOb2J0RBWOsAWxluuADAa80NmiSAs1PQFc_vVbXVKHe_cSHDwcc6ams8bOT9AG8jFTF2gXoT7DW2Rc_21viIk6UNCWWIPEuBIIZLlEbN1MNswrBFfSQI7ovQXGmN-5LYfBf1xMJp9A
+
 
       - name: Upload test results as JUnit format
         uses: actions/upload-artifact@v2
