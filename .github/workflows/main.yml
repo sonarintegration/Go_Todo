@@ -97,7 +97,7 @@ jobs:
 
       - name: Convert JSON Report to XML
         run: |
-          jq -n '[inputs]' report.json | jq -r '.[] | "<testcase name=\"" + .Test + "\" classname=\"" + .Package + "\" time=\"" + (.Elapsed | tostring) + "\">" + (if .Action == "pass" then "<passed/>" elif .Action == "fail" then "<failure/>" else "" end) + "</testcase>"' > report.xml
+          jq -n '[inputs]' report.json | jq -r 'select(.Test != null and .Test != "") | "<testcase name=\"" + .Test + "\" classname=\"" + .Package + "\" time=\"" + (.Elapsed | tostring) + "\">" + (if .Action == "pass" then "<passed/>" elif .Action == "fail" then "<failure/>" else "" end) + "</testcase>"' > report.xml
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@v2
