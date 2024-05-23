@@ -113,24 +113,31 @@ jobs:
       - name: Parse test report
         id: parse-test-report
         run: |
-          REPORT=$(cat test-report.json)
-          PASSED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="passed")] | length')
-          FAILED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="failed")] | length')
-          TOTAL=$(echo $REPORT | jq '.Tests | length')
-          echo "::set-output name=report::$REPORT"
-          echo "::set-output name=passed::$PASSED"
-          echo "::set-output name=failed::$FAILED"
-          echo "::set-output name=total::$TOTAL"
+         REPORT=$(cat test-report.json)
+         PASSED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="passed")] | length')
+         FAILED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="failed")] | length')
+         TOTAL=$(echo $REPORT | jq '.Tests | length')
+         echo "::set-output name=report::$REPORT"
+         echo "::set-output name=passed::$PASSED"
+         echo "::set-output name=failed::$FAILED"
+         echo "::set-output name=total::$TOTAL"
 
-      - name: Create comment on pull request with test report
+      - name: Comment on pull request with test report
         if: github.event_name == 'pull_request'
-        run: |
-          echo "### Test Report"
-          echo "**Total Tests:** ${{ steps.parse-test-report.outputs.total }}"
-          echo "**Passed:** ${{ steps.parse-test-report.outputs.passed }}"
-          echo "**Failed:** ${{ steps.parse-test-report.outputs.failed }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+         token: ${{ secrets.GHH_TOKEN }}  # Use GHH_TOKEN if GITHUB_TOKEN doesn't have sufficient permissions
+         issue-number: ${{ github.event.pull_request.number }}
+         body: |
+          ### Test Report
+          **Total Tests:** ${{ steps.parse-test-report.outputs.total }}
+          **Passed:** ${{ steps.parse-test-report.outputs.passed }}
+          **Failed:** ${{ steps.parse-test-report.outputs.failed }}
+
+          # \`\`\`json
+          # ${{ steps.parse-test-report.outputs.report }}
+          # \`\`\`
+
       # - name: Read test report
       #   id: test-report
       #   run: |
