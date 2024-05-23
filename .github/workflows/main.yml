@@ -105,24 +105,24 @@ jobs:
       - name: List files in workspace
         run: ls -R
 
+      - name: Read test report
+        id: test-report
+        run: |
+         REPORT=$(cat test-report.json)
+         echo "::set-output name=report::$REPORT"
+
       - name: Comment on pull request with test report
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v5
+        uses: peter-evans/create-or-update-comment@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-           const fs = require('fs');
-           const reportPath = 'test-report.json'; // Corrected path
-           const report = fs.readFileSync(reportPath, 'utf8');
-           const { owner, repo } = context.repo;
-           const issue_number = context.payload.pull_request.number;
-           const octokit = github.getOctokit(context.token);
-           await octokit.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number,
-            body: '### Test Report\n```json\n' + report + '\n```'
-           });
+          token: ${{ secrets.GH_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+           ### Test Report
+           \`\`\`json
+           ${{ steps.test-report.outputs.report }}
+           \`\`\`
+           
       # - name: Install go-junit-report
       #   run: go install github.com/jstemmer/go-junit-report@latest
 
