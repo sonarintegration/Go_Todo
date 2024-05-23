@@ -126,7 +126,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v1
         with:
-         token: ${{ secrets.GITHUB_TOKEN }}
+         token: ${{ secrets.GHH_TOKEN }}  # Use GHH_TOKEN if GITHUB_TOKEN doesn't have sufficient permissions
          issue-number: ${{ github.event.pull_request.number }}
          body: |
           ### Test Report
@@ -137,7 +137,6 @@ jobs:
           \`\`\`json
           ${{ steps.parse-test-report.outputs.report }}
           \`\`\`
-
       # - name: Read test report
       #   id: test-report
       #   run: |
