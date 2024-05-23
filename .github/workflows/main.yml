@@ -84,7 +84,7 @@ jobs:
         run: go build -v .
 
       - name: Unit Test
-        run: go test -v ./... -json > report.json
+        run: go test ./... -v -json > report.json
 
       - name: Install go-junit-report
         run: go install github.com/jstemmer/go-junit-report@latest
