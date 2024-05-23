@@ -89,16 +89,25 @@ jobs:
       - name: Install go-junit-report
         run: go install github.com/jstemmer/go-junit-report@latest
 
-      - name: Convert test results to JUnit XML
-        run: cat report.json | go-junit-report > report.xml
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Upload Test Report
+      - name: Run Unit Tests and Generate JSON Report
+        run: go test ./... -v -json > report.json
+
+      - name: Convert JSON Report to XML
+        run: |
+          jq -n '[inputs]' report.json | jq -r '.[] | "<testcase name=\"" + .Test + "\" classname=\"" + .Package + "\" time=\"" + (.Elapsed | tostring) + "\">" + (if .Action == "pass" then "<passed/>" elif .Action == "fail" then "<failure/>" else "" end) + "</testcase>"' > report.xml
+
+      - name: Upload Test Reports
         uses: actions/upload-artifact@v2
         with:
-          name: test-report
-          path: report.xml
+          name: test-reports
+          path: |
+            report.json
+            report.xml
 
-      - name: Publish test results
+      - name: Publish Test Results
         uses: mikepenz/action-junit-report@v3
         with:
           report_paths: 'report.xml'
