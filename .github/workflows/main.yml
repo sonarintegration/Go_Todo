@@ -124,21 +124,13 @@ jobs:
 
       - name: Create comment on pull request with test report
         if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
         run: |
           echo "### Test Report"
           echo "**Total Tests:** ${{ steps.parse-test-report.outputs.total }}"
           echo "**Passed:** ${{ steps.parse-test-report.outputs.passed }}"
           echo "**Failed:** ${{ steps.parse-test-report.outputs.failed }}"
-          uses: peter-evans/create-or-update-comment@v1
-          with:
-            issue-number: ${{ github.event.pull_request.number }}
-            body: |
-              ### Test Report
-              **Total Tests:** ${{ steps.parse-test-report.outputs.total }}
-              **Passed:** ${{ steps.parse-test-report.outputs.passed }}
-              **Failed:** ${{ steps.parse-test-report.outputs.failed }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
       # - name: Read test report
       #   id: test-report
       #   run: |
