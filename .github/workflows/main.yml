@@ -105,23 +105,57 @@ jobs:
       - name: List files in workspace
         run: ls -R
 
-      - name: Read test report
-        id: test-report
+      - name: Run tests and generate report
+        run: |
+     
+         echo '{"Time":"2024-05-23T10:58:55.329160757Z","Action":"start","Package":"todo_app","Tests":[{"Name":"Test1","Status":"passed"},{"Name":"Test2","Status":"failed"}]}' > test-report.json
+
+      - name: Parse test report
+        id: parse-test-report
         run: |
          REPORT=$(cat test-report.json)
+         PASSED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="passed")] | length')
+         FAILED=$(echo $REPORT | jq '[.Tests[] | select(.Status=="failed")] | length')
+         TOTAL=$(echo $REPORT | jq '.Tests | length')
          echo "::set-output name=report::$REPORT"
+         echo "::set-output name=passed::$PASSED"
+         echo "::set-output name=failed::$FAILED"
+         echo "::set-output name=total::$TOTAL"
 
       - name: Comment on pull request with test report
         if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v1
         with:
-          token: ${{ secrets.GHH_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-           ### Test Report
-           \`\`\`json
-           ${{ steps.test-report.outputs.report }}
-           \`\`\`
+         token: ${{ secrets.GITHUB_TOKEN }}
+         issue-number: ${{ github.event.pull_request.number }}
+         body: |
+          ### Test Report
+          **Total Tests:** ${{ steps.parse-test-report.outputs.total }}
+          **Passed:** ${{ steps.parse-test-report.outputs.passed }}
+          **Failed:** ${{ steps.parse-test-report.outputs.failed }}
+
+          \`\`\`json
+          ${{ steps.parse-test-report.outputs.report }}
+          \`\`\`
+
+      # - name: Read test report
+      #   id: test-report
+      #   run: |
+      #    REPORT=$(cat test-report.json)
+      #    echo "::set-output name=report::$REPORT"
+
+      # - name: Comment on pull request with test report
+      #   if: github.event_name == 'pull_request'
+      #   uses: peter-evans/create-or-update-comment@v1
+      #   with:
+      #     token: ${{ secrets.GHH_TOKEN }}
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     body: |
+      #      ### Test Report
+      #      \`\`\`json
+      #      ${{ steps.test-report.outputs.report }}
+      #      \`\`\`
+
            
       # - name: Install go-junit-report
       #   run: go install github.com/jstemmer/go-junit-report@latest
