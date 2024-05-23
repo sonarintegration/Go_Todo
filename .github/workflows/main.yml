@@ -1,4 +1,3 @@
-
 name: Main Branch CI Workflow
 
 on:
@@ -114,7 +113,9 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         with:
           report_paths: 'report.xml'
-          token: ${{ secrets.GHH_TOKEN }}
+        env:
+           GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
+       
 
       # - name: Code Coverage
       #   run: |
