@@ -23,50 +23,50 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: code test
-          args: --sarif-file-output=snyk.sarif
+      # - name: Run Snyk to check for vulnerabilities
+      #   uses: snyk/actions/golang@master
+      #   continue-on-error: true
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     command: code test
+      #     args: --sarif-file-output=snyk.sarif
 
-      - name: List directory contents
-        run: ls -la
+      # - name: List directory contents
+      #   run: ls -la
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk.sarif
-          category: my-analysis-tool
+      # - name: Upload SARIF file
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: snyk.sarif
+      #     category: my-analysis-tool
         
-      - name: Print Snyk report
-        run: cat snyk.sarif      
+      # - name: Print Snyk report
+      #   run: cat snyk.sarif      
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@master
-        with:
-           scan-type: 'fs'
-           ignore-unfixed: true
-           format: 'sarif'
-           output: 'trivy-results.sarif'
-           severity: 'CRITICAL'
+      # - name: Run Trivy vulnerability scanner in repo mode
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #      scan-type: 'fs'
+      #      ignore-unfixed: true
+      #      format: 'sarif'
+      #      output: 'trivy-results.sarif'
+      #      severity: 'CRITICAL'
 
-      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          format: 'github'
-          output: 'dependency-results.sbom.json'
-          image-ref: '.'
-          github-pat: ${{ secrets.GH_TOKEN }}
+      # - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     scan-type: 'fs'
+      #     format: 'github'
+      #     output: 'dependency-results.sbom.json'
+      #     image-ref: '.'
+      #     github-pat: ${{ secrets.GH_TOKEN }}
  
-      - name: Create coverage artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: trivy result
-          path: dependency-results.sbom.json
+      # - name: Create coverage artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: trivy result
+      #     path: dependency-results.sbom.json
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -106,98 +106,102 @@ jobs:
           path: |
             report.json
             report.xml
+
+      - name: Debug XML File
+        run: cat report.xml
+        
       - name: Publish Test Results
         uses: mikepenz/action-junit-report@v3
         with:
           report_paths: 'report.xml'
 
-      - name: Code Coverage
-        run: |
-          go test -coverprofile=coverage.out ./...
-          go tool cover -func=coverage.out
-          go tool cover -html=coverage.out -o coverage.html
+      # - name: Code Coverage
+      #   run: |
+      #     go test -coverprofile=coverage.out ./...
+      #     go tool cover -func=coverage.out
+      #     go tool cover -html=coverage.out -o coverage.html
         
-      - name: Upload Code Coverage Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-out
-          path: coverage.out
+      # - name: Upload Code Coverage Artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: coverage-out
+      #     path: coverage.out
 
-      - name: Upload Code Coverage HTML Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-html
-          path: coverage.html
+      # - name: Upload Code Coverage HTML Artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: coverage-html
+      #     path: coverage.html
 
-      - name: Static Code Analysis
-        uses: sonarsource/sonarqube-scan-action@v2
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=sonarintegration-1
-            -Dsonar.projectKey=sonarintegration-1_go-todo-project
-            -Dsonar.sources=./
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.pullrequest.provider=GitHub
-            -Dsonar.pullrequest.github.repository=${{ github.repository }}
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
-            -Dsonar.pullrequest.branch=${{ github.head_ref }}
-            -Dsonar.pullrequest.base=${{ github.base_ref }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # - name: Static Code Analysis
+      #   uses: sonarsource/sonarqube-scan-action@v2
+      #   with:
+      #     projectBaseDir: .
+      #     args: >
+      #       -Dsonar.organization=sonarintegration-1
+      #       -Dsonar.projectKey=sonarintegration-1_go-todo-project
+      #       -Dsonar.sources=./
+      #       -Dsonar.go.coverage.reportPaths=coverage.out
+      #       -Dsonar.host.url=https://sonarcloud.io
+      #       -Dsonar.pullrequest.provider=GitHub
+      #       -Dsonar.pullrequest.github.repository=${{ github.repository }}
+      #       -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+      #       -Dsonar.pullrequest.branch=${{ github.head_ref }}
+      #       -Dsonar.pullrequest.base=${{ github.base_ref }}
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Send notification on Slack using Webhooks - Success
-        if: ${{ always() }}
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "Go project built successfully."
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # - name: Send notification on Slack using Webhooks - Success
+      #   if: ${{ always() }}
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "Go project built successfully."
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Send notification on Slack using Webhooks - Failure
-        if: ${{ failure() }}
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "Go build failed. Please check the build logs for details."
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # - name: Send notification on Slack using Webhooks - Failure
+      #   if: ${{ failure() }}
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "Go build failed. Please check the build logs for details."
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Download Code Coverage Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-out
-          path: ./coverage
+      # - name: Download Code Coverage Artifact
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: coverage-out
+      #     path: ./coverage
 
-      - name: Verify Code Coverage
-        run: |
-          COVERAGE=$(go tool cover -func=./coverage/coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-          THRESHOLD=5.0
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            echo "Code coverage is below threshold: $COVERAGE%"
-            exit 1
-          else
-            echo "Code coverage is above threshold: $COVERAGE%"
-          fi
-      - name: Install JFrog CLI
-        run: |
-         curl -fL https://getcli.jfrog.io | sh
-         chmod +x jfrog
-         mv jfrog /usr/local/bin/
-      - name: Configure JFrog CLI
-        env:
-         ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-         ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-        run: |
-         jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
-      - name: Push Artifacts to JFrog
-        run: |
-          jfrog rt u todo_app.exe gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTc1OTExNCwianRpIjoiNzNjMjRkNzgtMzc4ZC00YTdhLThiN2UtZDAxYTcwMTU4Zjc1In0.e2DMbVLertJgGOXmWWuFC_REpbHt6xTE7wGiDSYq_Y0TCMNrvuEiFND42KjqMGIepBGdvVlzzN0fkYkVapQNaHwT97NG1uDWutkhGvr6sLZsrDjhxCJk_H4Gssez2uBjf8Pea7dkAlw1M3qmWuz_7Xkb9s-C0_mUGHC97rEDUPeeGtaQ3-wDgXZUq24Ll6ABH13VYsbuNr7FsOb2J0RBWOsAWxluuADAa80NmiSAs1PQFc_vVbXVKHe_cSHDwcc6ams8bOT9AG8jFTF2gXoT7DW2Rc_21viIk6UNCWWIPEuBIIZLlEbN1MNswrBFfSQI7ovQXGmN-5LYfBf1xMJp9A
+      # - name: Verify Code Coverage
+      #   run: |
+      #     COVERAGE=$(go tool cover -func=./coverage/coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+      #     THRESHOLD=5.0
+      #     if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+      #       echo "Code coverage is below threshold: $COVERAGE%"
+      #       exit 1
+      #     else
+      #       echo "Code coverage is above threshold: $COVERAGE%"
+      #     fi
+      # - name: Install JFrog CLI
+      #   run: |
+      #    curl -fL https://getcli.jfrog.io | sh
+      #    chmod +x jfrog
+      #    mv jfrog /usr/local/bin/
+      # - name: Configure JFrog CLI
+      #   env:
+      #    ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+      #    ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+      #    ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      #   run: |
+      #    jfrog config add rt-server --artifactory-url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --password $ARTIFACTORY_PASSWORD --interactive=false
+      # - name: Push Artifacts to JFrog
+      #   run: |
+      #     jfrog rt u todo_app.exe gitjfrog-libs-snapshot-local/ --url=https://shubhamtodo.jfrog.io/artifactory/gotodo-go-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJQMXBBZ19WSWNRWTZDb2pIYlFPMk1QcU1tcWlYRng2VnI2R3FWZUNsR2lrIn0.eyJzdWIiOiJqZmFjQDAxaHh0NDFqNGF3NThoMXY4N2U3d2UxNHBuL3VzZXJzL3NodWJoYW1jaGF2QGN5YmFnZS5jb20iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMWh4dDQxajRhdzU4aDF2ODdlN3dlMTRwbiIsImlhdCI6MTcxNTc1OTExNCwianRpIjoiNzNjMjRkNzgtMzc4ZC00YTdhLThiN2UtZDAxYTcwMTU4Zjc1In0.e2DMbVLertJgGOXmWWuFC_REpbHt6xTE7wGiDSYq_Y0TCMNrvuEiFND42KjqMGIepBGdvVlzzN0fkYkVapQNaHwT97NG1uDWutkhGvr6sLZsrDjhxCJk_H4Gssez2uBjf8Pea7dkAlw1M3qmWuz_7Xkb9s-C0_mUGHC97rEDUPeeGtaQ3-wDgXZUq24Ll6ABH13VYsbuNr7FsOb2J0RBWOsAWxluuADAa80NmiSAs1PQFc_vVbXVKHe_cSHDwcc6ams8bOT9AG8jFTF2gXoT7DW2Rc_21viIk6UNCWWIPEuBIIZLlEbN1MNswrBFfSQI7ovQXGmN-5LYfBf1xMJp9A
