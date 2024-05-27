@@ -112,7 +112,7 @@ jobs:
       - name: Publish Test Results
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: 'report.xml'
+          report_paths: '**/report.xml'
         env:
            GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
        
