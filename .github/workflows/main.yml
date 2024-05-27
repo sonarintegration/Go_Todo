@@ -83,38 +83,51 @@ jobs:
       - name: Compile
         run: go build -v .
 
-      - name: Unit Test
-        run: go test ./... -v -json > report.json
-
-      - name: Install go-junit-report
-        run: go install github.com/jstemmer/go-junit-report/v2@latest
-
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Run Unit Tests and Generate JSON Report
-        run: go test ./... -v -json > report.json
-
-      - name: Convert JSON Report to XML
+      - name: Run Tests
         run: |
-          jq -n '[inputs]' report.json | jq -r '.[] | "<testcase name=\"" + .Test + "\" classname=\"" + .Package + "\" time=\"" + (.Elapsed | tostring) + "\">" + (if .Action == "pass" then "<passed/>" elif .Action == "fail" then "<failure/>" else "" end) + "</testcase>"' > report.xml
-      - name: Upload Test Reports
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-reports
-          path: |
-            report.json
-            report.xml
+          mkdir -p test-reports
+          go test -v ./... 2>&1 | tee test-reports/tests.txt
 
-      - name: Debug XML File
-        run: cat report.xml
-        
-      - name: Publish Test Results
+      - name: Generate JUnit report
+        run: cat test-reports/tests.txt | go-junit-report > test-reports/junit-report.xml
+
+      - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: '**/test-reports/*.xml'
-        env:
-           GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
+           report_paths: 'test-reports/junit-report.xml'
+
+      # - name: Unit Test
+      #   run: go test ./... -v -json > report.json
+
+      # - name: Install go-junit-report
+      #   run: go install github.com/jstemmer/go-junit-report/v2@latest
+
+      # - name: Install jq
+      #   run: sudo apt-get update && sudo apt-get install -y jq
+
+      # - name: Run Unit Tests and Generate JSON Report
+      #   run: go test ./... -v -json > report.json
+
+      # - name: Convert JSON Report to XML
+      #   run: |
+      #     jq -n '[inputs]' report.json | jq -r '.[] | "<testcase name=\"" + .Test + "\" classname=\"" + .Package + "\" time=\"" + (.Elapsed | tostring) + "\">" + (if .Action == "pass" then "<passed/>" elif .Action == "fail" then "<failure/>" else "" end) + "</testcase>"' > report.xml
+      # - name: Upload Test Reports
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: test-reports
+      #     path: |
+      #       report.json
+      #       report.xml
+
+      # - name: Debug XML File
+      #   run: cat report.xml
+        
+      # - name: Publish Test Results
+      #   uses: mikepenz/action-junit-report@v4
+      #   with:
+      #     report_paths: '**/test-reports/*.xml'
+      #   env:
+      #      GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
        
 
       # - name: Code Coverage
