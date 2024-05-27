@@ -83,6 +83,11 @@ jobs:
       - name: Compile
         run: go build -v .
 
+      - name: Install go-junit-report
+        run: |
+         go install github.com/jstemmer/go-junit-report@latest
+         echo "${GOPATH}/bin" >> $GITHUB_PATH
+
       - name: Run Tests
         run: |
           mkdir -p test-reports
