@@ -25,7 +25,8 @@ func main() {
 	CREATE TABLE IF NOT EXISTS todos (
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
-		completed BOOLEAN NOT NULL DEFAULT FALSE
+		description TEXT,
+		completed TINYINT(1) NOT NULL DEFAULT 0
 	);`
 	_, err = db.Exec(createTableQuery)
 	if err != nil {
