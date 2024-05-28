@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"todo_app/services"
 
 	"github.com/rs/cors"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -19,6 +19,18 @@ func main() {
 		log.Fatal("Error connecting to the database:", err)
 	}
 	defer db.Close()
+
+	// Create todos table if it doesn't exist
+	createTableQuery := `
+	CREATE TABLE IF NOT EXISTS todos (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		title VARCHAR(255) NOT NULL,
+		completed BOOLEAN NOT NULL DEFAULT FALSE
+	);`
+	_, err = db.Exec(createTableQuery)
+	if err != nil {
+		log.Fatal("Error creating todos table:", err)
+	}
 
 	// Initialize TodoService
 	todoService := &services.TodoServiceImpl{DB: db}
@@ -58,5 +70,5 @@ func main() {
 	// Start the server
 	port := ":8080"
 	fmt.Println("Server started on port", port)
-	log.Fatal(http.ListenAndServe("172.27.59.220:8080", corsHandler))
+	log.Fatal(http.ListenAndServe("172.27.59.220"+port, corsHandler))
 }
