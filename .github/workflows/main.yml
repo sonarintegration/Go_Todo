@@ -139,6 +139,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+      - name: Quality check for sonarCloud
+        run: curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project >result.json
+             cat result.json
+              if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+
       - name: Send notification on Slack using Webhooks - Success
         if: ${{ always() }}
         uses: slackapi/slack-github-action@v1.24.0
