@@ -140,17 +140,26 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Quality check for SonarCloud
-        run: |
-               curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=sonarintegration-1_go-todo-project -o result.json
-               cat result.json
-               if [ "$(jq -r '.projectStatus.status' result.json)" = "ERROR" ]; then
-                  echo "Quality gate failed."
-                  exit 1
-               else
-                  echo "Quality gate passed."
-                  fi
         env:
-           GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+                 curl -s https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }} -o result.json
+                 cat result.json
+                 if [ "$(jq -r '.projectStatus.status' result.json)" = "ERROR" ]; then 
+                   echo "Quality gate failed."
+                   exit 1
+                 else
+                   echo "Quality gate passed."
+                  fi
+
+      
+                 failedConditions=$(jq -r '.projectStatus.conditions[] | select(.status == "ERROR") | "\(.metricKey): \(.actualValue) (threshold: \(.errorThreshold))"' result.json)
+
+                 if [ -n "$failedConditions" ]; then
+                   echo "Failed Conditions:"
+                   echo "$failedConditions"
+                 fi
 
 
       # - name: Send notification on Slack using Webhooks - Success
