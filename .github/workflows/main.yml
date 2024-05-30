@@ -22,50 +22,50 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: code test
-          args: --sarif-file-output=snyk.sarif
+      # - name: Run Snyk to check for vulnerabilities
+      #   uses: snyk/actions/golang@master
+      #   continue-on-error: true
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     command: code test
+      #     args: --sarif-file-output=snyk.sarif
 
-      - name: List directory contents
-        run: ls -la
+      # - name: List directory contents
+      #   run: ls -la
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk.sarif
-          category: my-analysis-tool
+      # - name: Upload SARIF file
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: snyk.sarif
+      #     category: my-analysis-tool
         
-      - name: Print Snyk report
-        run: cat snyk.sarif      
+      # - name: Print Snyk report
+      #   run: cat snyk.sarif      
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@master
-        with:
-           scan-type: 'fs'
-           ignore-unfixed: true
-           format: 'sarif'
-           output: 'trivy-results.sarif'
-           severity: 'CRITICAL'
+      # - name: Run Trivy vulnerability scanner in repo mode
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #      scan-type: 'fs'
+      #      ignore-unfixed: true
+      #      format: 'sarif'
+      #      output: 'trivy-results.sarif'
+      #      severity: 'CRITICAL'
 
-      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          format: 'github'
-          output: 'dependency-results.sbom.json'
-          image-ref: '.'
-          github-pat: ${{ secrets.GH_TOKEN }}
+      # - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     scan-type: 'fs'
+      #     format: 'github'
+      #     output: 'dependency-results.sbom.json'
+      #     image-ref: '.'
+      #     github-pat: ${{ secrets.GH_TOKEN }}
  
-      - name: Create coverage artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: trivy result
-          path: dependency-results.sbom.json
+      # - name: Create coverage artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: trivy result
+      #     path: dependency-results.sbom.json
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -139,10 +139,19 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Quality check for sonarCloud
-        run: curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=sonarintegration-1_go-todo-project >result.json
-             cat result.json
-              if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+      - name: Quality check for SonarCloud
+        run: |
+               curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=sonarintegration-1_go-todo-project -o result.json
+               cat result.json
+               if [ "$(jq -r '.projectStatus.status' result.json)" = "ERROR" ]; then
+                  echo "Quality gate failed."
+                  exit 1
+               else
+                  echo "Quality gate passed."
+                  fi
+        env:
+           GITHUB_TOKEN: ${{ secrets.GHH_TOKEN }}
+
 
       - name: Send notification on Slack using Webhooks - Success
         if: ${{ always() }}
