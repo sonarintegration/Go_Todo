@@ -81,6 +81,18 @@ jobs:
             
       - name: Compile
         run: go build -v .
+
+      - name: Alerts
+        if: ${{ failure() }}
+        uses: twilio-labs/actions-sms@v1
+        with:
+           fromPhoneNumber: ${{ secrets.FROM_NUMBER }}
+           toPhoneNumber: ${{ secrets.TO_NUMBER }}
+           message: ${{ github.job }} job of ${{ github.repository }}
+        env:
+           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+           # TWILIO_API_KEY: ${{ secrets.TWILIO_API_KEY }}
+           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
         
       - name: Install go-junit-report
         run: |
