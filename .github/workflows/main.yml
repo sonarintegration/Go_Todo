@@ -83,7 +83,7 @@ jobs:
         run: go build -v .
 
       - name: Alerts
-        if: ${{ failure() }}
+        if: ${{ always() }}
         uses: twilio-labs/actions-sms@v1
         with:
            fromPhoneNumber: ${{ secrets.FROM_NUMBER }}
