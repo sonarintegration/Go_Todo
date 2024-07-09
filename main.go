@@ -56,4 +56,4 @@ func main() {
         port := ":8082"
         fmt.Println("Server started on port", port)
         log.Fatal(http.ListenAndServe("0.0.0.0"+port, corsHandler))
-                              
+}                              
